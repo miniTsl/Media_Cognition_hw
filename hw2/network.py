@@ -92,6 +92,7 @@ class Linear(nn.Module):
 
     def forward(self, x):
         # here we call the LinearFunction we implement above
+        # apply是因为LinearFunction类的forward是静态方法？
         return LinearFunction.apply(x, self.W, self.b)
 
 
