@@ -52,7 +52,7 @@ class CNN(nn.Module):
         # conv       3          1        1          64
         # batchnorm
         # relu
-        self.conv3 = nn.Sequential(Conv2d(64, 64, 3, 1,1), bn2d(64), nn.ReLU())
+        self.conv3 = nn.Sequential(Conv2d(64, 64, 3, 1, 1), bn2d(64), nn.ReLU())
         # conv       3          1        1          128
         # batchnorm
         # relu

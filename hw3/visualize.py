@@ -21,6 +21,7 @@ import torchvision.transforms as transforms
 from network import CNN
 # Import Conv2d layer and MaxPool2d layer
 from conv import Conv2d
+from pool import MaxPool2d
 import matplotlib.pyplot as plt
 import sklearn
 from sklearn.manifold import TSNE
@@ -106,8 +107,8 @@ class ConvFeatureVisualization():
             axes[i//w, i%w].set_title(str(i), fontsize='small')
             axes[i//w, i%w].axis('off')
             cv2.imwrite(os.path.join(save_dir, 'channel_%d.jpg'%i), 255*x)
-        plt.show()
         plt.savefig(os.path.join(save_dir, 'feature_map.jpg'), dpi=200)
+        plt.show()
         print('Results are saved as {}'.format(os.path.join(save_dir, 'feature_map.jpg')))
         self.hook.remove()
 
@@ -148,7 +149,7 @@ if __name__ == '__main__':
         conv_layer_indices = []
         filter_nums = []
         for i, m in enumerate(conv_net.children()):
-            if not isinstance(m, torch.nn.MaxPool2d):
+            if not isinstance(m, MaxPool2d):
                 conv_layer_indices.append(i)
                 filter_nums.append(m[0].out_channels)
         
@@ -162,8 +163,9 @@ if __name__ == '__main__':
             axes[i//w, i%w].imshow(x[:,:,0], cmap='rainbow')
             axes[i//w, i%w].set_title(str(i), fontsize='small')
             axes[i//w, i%w].axis('off')
-        plt.show()
+        
         plt.savefig(os.path.join(opt.save_dir, 'filter', 'filter_layer_%d.jpg'%opt.layer_idx), dpi=200)
+        plt.show()
         print('Results are saved as {}'.format(os.path.join(opt.save_dir, 'filter', 'filter_layer_%d.jpg'%opt.layer_idx)))
 
     elif opt.type == 'feature':
@@ -173,7 +175,7 @@ if __name__ == '__main__':
 
         conv_layer_indices = []
         for i, m in enumerate(conv_net.children()):
-            if not isinstance(m, torch.nn.MaxPool2d):
+            if not isinstance(m, MaxPool2d):
                 conv_layer_indices.append(i)
 
         visual = ConvFeatureVisualization(conv_net, feature_dir)
@@ -232,14 +234,3 @@ if __name__ == '__main__':
         plt.savefig(os.path.join(tsne_dir, 'tsne_%d.jpg'%layer_idx), dpi=300)
         plt.show()
         print('Results are saved as {}'.format(os.path.join(tsne_dir, 'tsne_%d.jpg'%opt.layer_idx)))
-
-                
-
-
-
-
-        
-
-
-        
-        

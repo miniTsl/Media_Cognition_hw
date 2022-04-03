@@ -8,6 +8,7 @@
 #             (C) Copyright 2022
 #========================================================
 
+from numpy import outer
 import torch
 import torch.nn as nn
 from torch.autograd import Function
@@ -43,7 +44,8 @@ class Conv2dFunction(Function):
         stride_h, stride_w = stride
         out_channels = weight.shape[0]
         # TODO 1.1: calculate the height and width of output feature maps via input_h/input_w, kernel_h/kernel_w, stride_h/stride_w and padding_h/padding_w.
-
+        out_h = (input_h - kernel_h + 2*padding_h)//stride_h +1   # 注意是双斜杠
+        out_w = (input_w - kernel_w + 2*padding_w)//stride_w +1
         # end TODO 1.1
 
         # TODO 1.2: calculate the results of 2D convolution via img2col and matrix multiplication
@@ -51,22 +53,23 @@ class Conv2dFunction(Function):
         # Please refer to the introduction of img2col in our lecture notes for this homework in week 6. 媒体与认知第三次习题课课件.pdf (page 5)
         # More details about unfold function can refer to  https://pytorch.org/docs/stable/generated/torch.nn.Unfold.html?highlight=unfold#torch.nn.Unfold .
         # The output size of unfold function is [batch_size, in_channels*kernel_h*kernel_w, out_h*out_w] (b,c,n)
-        
+        x_cols = nn.functional.unfold(input, kernel_size=kernel_size, padding= padding, stride = stride)
 
         # step 2: reshape weights and calculate W * x based on the unfolded x_cols, weight_re via torch.matmul()
         # reshape the size of weights from [out_channels, in_channels, kernel_h, kernel_w] to [out_channels, in_channels*kernel_h*kernel_w] (o, c)
-        
+        weight_re = weight.reshape(out_channels, -1)
         # Hint: the size of x_cols is [batch_size, in_channels*kernel_h*kernel_w, out_h*out_w] (b,c,n)
         # the size of weight_re is [out_channels, in_channels*kernel_h*kernel_w] (o,c)
         # the size of output is [batch_size, out_channels, out_h*out_w] (b,o,n)
-        
+        output = torch.matmul(weight_re, x_cols)    # 这里用了广播机制,weight_re最前面加了代表batch_size的新维度
 
         # step 3: reshape bias and calculate the final result of 2D convolution W * x + b
         # the size of output is [batch_size, out_channels, out_h*out_w] (b,o,n)
         # reshape the size of bias from [out_channels] to [1, out_channels,1] (1,o,1)
-        
+        bias_re =  bias.reshape(1, out_channels ,1)
+        output = output + bias_re
         # Hint: we expect that the size of result is [batch_size, out_channels, out_h, out_w]
-        
+        output = output.reshape(batch_size, out_channels, out_h, out_w)
         # end TODO 1.2
 
         # Save the values of related variables for backward computation.
@@ -87,42 +90,41 @@ class Conv2dFunction(Function):
         '''
         # Load saved variables
         x_cols, weight, input_size, kernel_size, stride, padding = ctx.saved_tensors
-        
         kernel_h, kernel_w = kernel_size
         in_channels = weight.shape[1]
-
+        batch_size, out_channels, _, _ = output_grad.shape
+        
         # TODO 1.3: calculate dL/dW, dL/db and dL/dx.
         # step 1: reshape output_grad (dL/dy) and weights before matrix multiplication
-
         # reshape the size of dL/dy from [batch_size, out_channels, out_h, out_w] to [batch_size, out_channels, out_h*out_w] (b,o,n)
-
-        # reshape the size of weight from [out_channels, in_channels, kernel_h, kernel_w] to [out_channels, in_channels*kernel_h*kernel_w] (o,c)
-
-
+        output_grad_re = output_grad.reshape(batch_size, out_channels, -1)
+        
         # step 2: calculate dL/dW based on the unfolded x_cols and output_grad via torch.matmul().
         # Hint: the size of x_cols is [batch_size, in_channels*kernel_h*kernel_w, out_h*out_w] (b,c,n)
-        # the size of output_grad is [batch_size, out_channels, out_h*out_w] (b,o,n)
+        # the size of output_grad_re is [batch_size, out_channels, out_h*out_w] (b,o,n)
         # the size of dL/dW (i.e. W_grad) is the same as W_re which is [out_channels, in_channels*kernel_h*kernel_w] (o,c)
         # [batch_size, out_channels, in_channels*kernel_h*kernel_w] (b,o,c)
-
+        W_grad = torch.matmul(output_grad_re, x_cols.transpose(1,2)).sum(0)
         # Hint: we expect that the size of dL/dW (i.e. W_grad) is [out_channels, in_channels, kernel_h, kernel_w]
-        
+        W_grad = W_grad.reshape(out_channels, in_channels, kernel_h, kernel_w)
 
         # step 3: calculate dL/db based on output_grad via torch.sum().
-        # the size of output_grad is [batch_size, out_channels, out_h*out_w] (b,o,n)
+        # the size of output_grad_re is [batch_size, out_channels, out_h*out_w] (b,o,n)
         # the size of dL/db (i.e. b_grad) is [out_channels,]
-        
+        b_grad = output_grad_re.sum(-1).sum(0)
 
         # step 4: calculate dL/d(x_cols) based on output_grad and weight_re via torch.matmul() and obtain dL/dx via torch.nn.functional.fold
-        # Hint: the size of output_grad is [batch_size, out_channels, out_h*out_w] (b,o,n)
+        # Hint: the size of output_grad_re is [batch_size, out_channels, out_h*out_w] (b,o,n)
+        # reshape the size of weight from [out_channels, in_channels, kernel_h, kernel_w] to [out_channels, in_channels*kernel_h*kernel_w] (o,c)
+        weight_re = weight.reshape(out_channels, -1)
         # the size of weight_re be [out_channels, in_channels*kernel_h*kernel_w] (o,c)
         # the size of dL/d(x_cols) (i.e. x_cols_grad) is [batch_size, in_channels*kernel_h*kernel_w, out_h*out_w] (b,c,n)
-        
-
+        x_cols_grad = torch.matmul(weight_re.transpose(0,1),output_grad_re)
         # Use torch.nn.functional.fold function to transfer the size of x_cols_grad from [batch_size, in_channels*kernel_h*kernel_w, out_h*out_w] to [batch_size, in_channels, input_h, input_w].
         # Note that kernel_size, stride and padding are Tensor here, use tuple(x.numpy()) to transfer them into tuple as parameters for fold function.
         # More details about fold function can refer to  https://pytorch.org/docs/stable/generated/torch.nn.Unfold.html?highlight=unfold#torch.nn.Fold .
-        
+        x_grad = nn.functional.fold(x_cols_grad, tuple(input_size.numpy()), kernel_size = tuple(kernel_size.numpy()), padding = tuple(padding.numpy()), stride=tuple(stride.numpy()))
+        # fold函数的第二个参数应该是[input_h, input_w]
         # end TODO 1.3
         
         return x_grad, W_grad, b_grad, None, None, None
@@ -143,7 +145,7 @@ class Conv2d(nn.Module):
         super(Conv2d, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
-
+        # kernel_size、stride、padding都是长度为2的tuple
         if isinstance(kernel_size, tuple):
             self.kernel_size = kernel_size[:2]
         elif isinstance(kernel_size, int):
@@ -166,7 +168,8 @@ class Conv2d(nn.Module):
             raise TypeError("The type of padding must be tuple or int!")
 
         # TODO 1.4: initialize weights and bias of the 2D convolution layer and set W and b trainable parameters
-
+        self.W = Parameter(torch.randn(self.out_channels, self.in_channels, self.kernel_size[0], self.kernel_size[1]))
+        self.b = Parameter(torch.zeros(self.out_channels))
         # End TODO 1.4
 			
     def forward(self, x):

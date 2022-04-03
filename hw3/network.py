@@ -42,28 +42,28 @@ class CNN(nn.Module):
         # conv       5          1        2          32
         # batchnorm
         # relu
-
+        self.conv1 = nn.Sequential(Conv2d(in_channels, 32, 5, 1, 2), bn2d(32), nn.ReLU())
         # conv       5          1        2          64
         # batchnorm
         # relu
-
+        self.conv2 = nn.Sequential(Conv2d(32, 64, 5, 1, 2), bn2d(64), nn.ReLU())
         # maxpool    2          2        0   
-          
+        self.pool1 = MaxPool2d(2, 2, 0)
         # conv       3          1        1          64
         # batchnorm
         # relu
-
+        self.conv3 = nn.Sequential(Conv2d(64, 64, 3, 1, 1), bn2d(64), nn.ReLU())
         # conv       3          1        1          128
         # batchnorm
         # relu
-
+        self.conv4 = nn.Sequential(Conv2d(64, 128, 3, 1, 1), bn2d(128), nn.ReLU())
         # maxpool    2          2        0
-        
+        self.pool2 = MaxPool2d(2, 2, 0)
         # conv       3          1        1          128
         # batchnorm
         # relu
         # dropout(p), where p is input parameter of dropout ratio
-        
+        self.conv5 = nn.Sequential(Conv2d(128, 128, 3, 1, 1), bn2d(128), nn.ReLU(), nn.Dropout(p))
         # end TODO 2.1
 
         # TODO 2.2: complete a sub-network with two linear layers by using nn.Sequential function
@@ -74,8 +74,15 @@ class CNN(nn.Module):
         # activation, i.e. nn.ReLu()
         # dropout(p), where p is input parameter of dropout ratio
         # linear    (in_features_output_layer, num_class)
-        # linear    num_class
-        
+        # TODO 2.1 中各层输出图像的[h,w] 分别为[32,32],[32,32],[16,16],[16,16], [16,16], [8,8], [8,8]
+        # 当然总的形状是[batch_size, out_channels = 128, 8, 8]
+        self.fc_net = nn.Sequential(
+            nn.Linear(128*8*8, 256),
+            bn1d(256),
+            nn.ReLU(),
+            nn.Dropout(p),
+            nn.Linear(256, num_class)
+        )
         # end TODO 2.2
 
         self.init_weights()
@@ -107,11 +114,17 @@ class CNN(nn.Module):
         batch_size = x.shape[0]
         # TODO 2.3: forward process
         # step 1: forward process for convolutional layers, apply residual connection in conv3 and conv5
-        
+        x1 = self.conv1(x)
+        x2 = self.conv2(x1)
+        p1 = self.pool1(x2)
+        x3 = self.conv3(p1) + p1
+        x4 = self.conv4(x3)
+        p2 = self.pool2(x4)
+        x5 = self.conv5(p2) +p2
         # step 2: using Tensor.view() to flatten the tensor so as to match the size of input of fully connected layers. 
-        
+        out = x5.view(batch_size, -1)
         # step 3: forward process for linear layers
-        
+        out = self.fc_net(out)
         # end TODO 2.3
 
         if return_features:

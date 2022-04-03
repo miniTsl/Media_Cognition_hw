@@ -45,10 +45,10 @@ def dataLoader(data_path, norm_size, batch_size, workers=0):
         transforms.Normalize(0.5, 0.5)
     ])
     # TODO 3.1: use ImageFolder to construct a dataset for image classification task
-
+    dataset = ImageFolder(data_path, transform)
     # end TODO 3.1
     return DataLoader(dataset,
-                      batch_size=batch_size,
+                      batch_size = batch_size,
                       shuffle=True if 'train' in data_path else False,  # shuffle images only when training
                       num_workers=workers)
 
