@@ -9,6 +9,7 @@
 # ========================================================
 
 # ==== Part 0: import libs
+from statistics import mode
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
@@ -43,7 +44,7 @@ class FeatureDataset(Dataset):
     # return the number of samples (N) in self.data, using .shape[dim]
     # the shape of self.data is (N, channels)
     def __len__(self):
-        return ???
+        return self.data.shape[0]
 
     # TODO: define the __getitem__ function of the Dataset class
     # item is an integer >= 0, indicating the index of an sample
@@ -51,8 +52,8 @@ class FeatureDataset(Dataset):
     # the returned feature should be of the shape (channels, ) and the returned label should be of the shape (1, )
     def __getitem__(self, item):
         # feature denotes one element in self.data, and label denotes one element in self.labels
-        feature = ???
-        label = ???
+        feature = self.data[item]
+        label = self.labels[item]
         return feature, label
 
 
@@ -91,17 +92,17 @@ def train_val_hinge(train_file_path, val_file_path,
     '''
 
     # TODO: training and validation data loader using the previous self-defined function dataLoader()
-    trainloader = ???
-    valloader = ???
+    trainloader = dataLoader(train_file_path, batch_size)
+    valloader = dataLoader(val_file_path, batch_size)
 
     C = C * len(trainloader)
 
     # TODO: initialize the hinge-loss type SVM;the SVM_HINGE class needs two parameters: in_channels, and C.
-    model = ???
+    model = SVM_HINGE(feature_channels, C)
     # TODO: put the model on CPU or GPU
-    model = ???
+    model = model.to(device)
     # TODO: initialize the Adam optimizer with model parameters and learning rate
-    optimizer = optim.Adam(???, ???)
+    optimizer = optim.Adam(model.parameters(), lr)
 
     # training
     # to save loss of each training epoch in a python "list" data structure
@@ -109,25 +110,25 @@ def train_val_hinge(train_file_path, val_file_path,
 
     for epoch in range(n_epochs):
         # TODO: set the model in training mode
-        ???
+        model.train()
         # to save total loss in one epoch
         total_loss = 0.
         # TODO: get a batch of data; you may need enumerate() to iteratively get data from trainloader.
         # you can refer to previous homework, for example hw2
-        for ??? in ???:
+        for idx, (feas, labels) in enumerate(trainloader):
             # TODO: set data type (.float()) and device (.to())
-            feas, labels = ???
+            feas, labels = feas.float().to(device), labels.float().to(device)
             # TODO: clear gradients in the optimizer
-            ???
+            optimizer.zero_grad()
             # TODO: run the model with hinge loss; the model needs two inputs: feas and labels
-            out, loss = ???
+            out, loss = model(feas, labels)
             # TODO: back-propagation on the computation graph
-            ???
+            loss.backward()
             # sum up of total loss, loss.item() return the value of the tensor as a standard python number
             # this operation is not differentiable
             total_loss += loss.item()
             # TODO: call a function to update the parameters of the models
-            ???
+            optimizer.step()
 
         # average of the total loss for iterations
         avg_loss = total_loss / len(trainloader)
@@ -137,17 +138,17 @@ def train_val_hinge(train_file_path, val_file_path,
         # validation
         if (epoch + 1) % valInterval == 0:
             # TODO: set the model in evaluation mode
-            ???
+            model.eval()
             n_correct = 0.  # number of images that are correctly classified
             n_feas = 0.  # number of total images
             with torch.no_grad():  # we do not need to compute gradients during validation
                 # TODO: inference on the validation dataset, similar to the training stage but use valloader.
-                for ??? in ???:
+                for idx, (feas, labels) in enumerate(valloader):
                     # TODO: set data type (.float()) and device (.to())
-                    feas, labels = ???
+                    feas, labels = feas.float().to(device), labels.float().to(device)
                     # TODO: run the model; at the validation step, the model only needs one input: feas
                     # _ refers to a placeholder, which means we do not need the second returned value during validating
-                    out, _ = ???
+                    out, _ = model(feas)
                     predictions = out[:, 0]
                     # sum up the number of images correctly recognized
                     n_correct += torch.sum((predictions == labels).float())
@@ -236,7 +237,7 @@ if __name__ == '__main__':
 
     # set configurations
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', type=str, default='baseline', help='hinge, baseline')
+    parser.add_argument('--mode', type=str, default='hinge', help='hinge, baseline')
     parser.add_argument('--train_file_path', type=str, default='data/train.npy',
                         help='file list of training image paths and labels')
     parser.add_argument('--val_file_path', type=str, default='data/val.npy',

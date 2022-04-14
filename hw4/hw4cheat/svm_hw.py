@@ -26,7 +26,7 @@ class Linear(torch.autograd.Function):
         the output should be of the shape: (batch_size, 1)
         """
         # TODO: compute the output of the linear function: output=W^T*x + b
-        output = ???
+        output = torch.matmul(x, W.T) + b   # 注意W和x的形状和输出的形状
         ctx.save_for_backward(x, W, b)
         return output
 
@@ -43,8 +43,8 @@ class Linear(torch.autograd.Function):
         x, W, b = ctx.saved_tensors
         batch, channels = x.shape
         # TODO: compute the grad with respect to W and b: dL/dW, dL/db
-        grad_W = ???
-        grad_b = ???
+        grad_W = torch.sum(grad_output * x, dim=0).reshape(1,-1)
+        grad_b = torch.sum(grad_output, dim=0).reshape(1,-1)
 
         return None, grad_W, grad_b
 
@@ -60,7 +60,7 @@ class Hinge(torch.autograd.Function):
         """
         C = C.type_as(W)
         # TODO: compute the hinge loss (together with L2 norm for SVM): loss = 0.5*||w||^2 + C*\sum_i{max(0, 1 - y_i*output_i)}
-        loss = ???
+        loss = 0.5*torch.norm(W,2)**2 + C*torch.sum((F.relu(1-label.view(-1,1)*output)))
         ctx.save_for_backward(output, W, label, C)
         return loss
 
@@ -72,8 +72,8 @@ class Hinge(torch.autograd.Function):
         """
         output, W, label, C = ctx.saved_tensors
         # TODO: compute the grad with respect to the output of the linear function and W: dL/doutput, dL/dW
-        grad_output = ???
-        grad_W = ???
+        grad_output = grad_loss * C * ((1-label.view(-1,1)*output)>0) * (-label.view(-1,1)) 
+        grad_W = grad_loss * W
         return grad_output, grad_W, None, None
 
 
@@ -87,8 +87,8 @@ class SVM_HINGE(nn.Module):
         """
         super().__init__()
         # TODO: define the parameters W and b
-        self.W = ???
-        self.b = ???
+        self.W = nn.Parameter(torch.randn(1,in_channels),requires_grad = True)
+        self.b = nn.Parameter(torch.randn(1,),requires_grad = True)
         self.C = torch.tensor([[C]], requires_grad=False)
 
     def forward(self, x, label=None):
