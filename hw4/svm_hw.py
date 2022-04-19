@@ -20,13 +20,13 @@ class Linear(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, W, b):
         """
-        W is of the shape (1, channels), x is of the shape (batch_size, channels) and b is of the shape (1, )
+        W is of the shape (1, channels), <which means there is only one middle-node>!!!!!!
+        x is of the shape (batch_size, channels) and b is of the shape (1, )
         in our homework, channels refers to the dimension of features, i.e. channels=2 for the input samples
-        you may need to multiply x with W^T using torch.matmul()
         the output should be of the shape: (batch_size, 1)
         """
-        # TODO: compute the output of the linear function: output=W^T*x + b
-        output = ???
+        # TODO: compute the output of the linear function: output=xW^T + b
+        output = torch.matmul(x, W.T) + b
         ctx.save_for_backward(x, W, b)
         return output
 
@@ -34,17 +34,17 @@ class Linear(torch.autograd.Function):
     def backward(ctx, grad_output):
         """
         the grad_output is of the shape (batch_size, 1);
-        in this homework, you need to sum grad_W or grad_b across the batch_size axis;
+        in this homework, you need to !!!<sum grad_W or grad_b across the batch_size axis> !!!;
         the shape of grad_W should be (1, channels), you may need torch.reshape() or .view() to modify the shape
-        the shape of grad_b should be (1, )
-        in pytorch, (1, ) refers to the shape of one-dimensional vector
-        you may need torch.reshape() or .view() to modify the shape
+        the shape of grad_b should be (1, ). 
+        
+        In pytorch, (1, ) refers to the shape of one-dimensional vector. You may need torch.reshape() or .view() to modify the shape
         """
         x, W, b = ctx.saved_tensors
         batch, channels = x.shape
         # TODO: compute the grad with respect to W and b: dL/dW, dL/db
-        grad_W = ???
-        grad_b = ???
+        grad_W = (grad_output * x).sum(0).reshape(1,-1)
+        grad_b = grad_output.sum(0)#.reshape(1,-1)
 
         return None, grad_W, grad_b
 
@@ -55,12 +55,12 @@ class Hinge(torch.autograd.Function):
     def forward(ctx, output, W, label, C):
         """
         in this homework, the input parameter 'label' is y in the equation for loss calculation
-        the input parameter 'output' is the output of the linear layer, i.e. output = W^T*x + b
+        the input parameter 'output' is the output of the linear layer, i.e. output = xW^T + b
         you may need F.relu() to implement the max() function.
         """
         C = C.type_as(W)
         # TODO: compute the hinge loss (together with L2 norm for SVM): loss = 0.5*||w||^2 + C*\sum_i{max(0, 1 - y_i*output_i)}
-        loss = ???
+        loss = 0.5*torch.norm(W)**2 + C*torch.sum(torch.relu(1-label.view(-1,1) * output), dim=0)
         ctx.save_for_backward(output, W, label, C)
         return loss
 
@@ -72,13 +72,16 @@ class Hinge(torch.autograd.Function):
         """
         output, W, label, C = ctx.saved_tensors
         # TODO: compute the grad with respect to the output of the linear function and W: dL/doutput, dL/dW
-        grad_output = ???
-        grad_W = ???
+        grad_output = C * grad_loss * ((1-label.view(-1,1)*output)>0)*(-label.view(-1,1))
+        grad_W = grad_loss * W
         return grad_output, grad_W, None, None
 
 
 class SVM_HINGE(nn.Module):
-
+    '''
+    利用Linear类和Hinge类自定义SVM_Hinge类
+    前向传播函数可以返回计算线性层的结果output以及Hinge层计算的损失loss
+    '''
     def __init__(self, in_channels, C):
         """
         the shape of W should be (1, channels) and the shape of b should be (1, )
@@ -87,8 +90,8 @@ class SVM_HINGE(nn.Module):
         """
         super().__init__()
         # TODO: define the parameters W and b
-        self.W = ???
-        self.b = ???
+        self.W = nn.Parameter(torch.randn(1,in_channels),requires_grad = True)
+        self.b = nn.Parameter(torch.randn(1,),requires_grad = True)
         self.C = torch.tensor([[C]], requires_grad=False)
 
     def forward(self, x, label=None):
@@ -102,12 +105,17 @@ class SVM_HINGE(nn.Module):
 
 
 def libsvm(train_file_path, val_file_path, C):
+    '''
+    利用Libsvm库提供的svm模块进行训练、预测
+    返回W, b, 支持向量的(索引+1)
+    '''
     train_data = np.load(train_file_path)
     train_labels = np.concatenate([np.ones(train_data.shape[0] // 2).astype(np.float32),
                                    -1.0 * np.ones(train_data.shape[0] // 2).astype(np.float32)], axis=0)
     val_data = np.load(val_file_path)
     val_labels = np.concatenate([np.ones(val_data.shape[0] // 2).astype(np.float32),
                                  -1.0 * np.ones(val_data.shape[0] // 2).astype(np.float32)], axis=0)
+    # 训练svm，使用C和线性核
     m = svm_train(train_labels, train_data, f'-c {C} -t 0')
 
     sv = m.get_sv_indices()
@@ -116,9 +124,10 @@ def libsvm(train_file_path, val_file_path, C):
     sv_labels = train_labels[sv]
     sv_coef = m.get_sv_coef()
     sv_coef = [x[0] for x in sv_coef]
-
+    # 只有支持向量才对W的计算有贡献
     W = (np.reshape(sv_coef, (-1, 1)) * np.reshape(sv_feature, (-1, 2))).sum(0)
     W = np.reshape(W, (1, 2))
+    # means(labels减去W和X的乘积), y should be W^Tx+b
     b = (np.reshape(sv_labels, (-1, )) - (W * np.reshape(sv_feature, (-1, 2))).sum(1)).mean()
 
     svm_predict(val_labels, val_data, m)

@@ -68,6 +68,7 @@ class Hinge(torch.autograd.Function):
     def backward(ctx, grad_loss):
         """
         the input parameter 'grad_loss' refers to the gradient of the final target loss with respect to the output (variable 'loss') of the forward function
+        in fact, this should be 1 ?
         the shape of grad_output should be (batch_size, 1) and the shape of grad_W should be (1, channels)
         """
         output, W, label, C = ctx.saved_tensors
