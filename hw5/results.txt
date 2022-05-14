@@ -1,0 +1,246 @@
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode train
+---- Finish loading 10000 samples from data/train ----
+---- Finish loading 500 samples from data/validation ----
+
+Epoch [1/40] start ...
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+train loss = 4.101, validation word accuracy = 0.0%
+
+Epoch [2/40] start ...
+train loss = 3.390, validation word accuracy = 0.0%
+
+Epoch [3/40] start ...
+train loss = 3.351, validation word accuracy = 0.0%
+
+Epoch [4/40] start ...
+train loss = 3.309, validation word accuracy = 0.0%
+
+Epoch [5/40] start ...
+train loss = 3.260, validation word accuracy = 0.0%
+
+Epoch [6/40] start ...
+train loss = 3.199, validation word accuracy = 0.0%
+
+Epoch [7/40] start ...
+train loss = 3.072, validation word accuracy = 0.0%
+
+Epoch [8/40] start ...
+train loss = 2.789, validation word accuracy = 0.4%
+
+Epoch [9/40] start ...
+train loss = 2.365, validation word accuracy = 3.0%
+
+Epoch [10/40] start ...
+train loss = 2.083, validation word accuracy = 6.2%
+[Info] model saved in models\model_epoch10.pth
+
+Epoch [11/40] start ...
+train loss = 1.864, validation word accuracy = 13.4%
+
+Epoch [12/40] start ...
+train loss = 1.709, validation word accuracy = 17.2%
+
+Epoch [13/40] start ...
+train loss = 1.584, validation word accuracy = 25.4%
+
+Epoch [14/40] start ...
+train loss = 1.493, validation word accuracy = 29.2%
+
+Epoch [15/40] start ...
+train loss = 1.411, validation word accuracy = 30.0%
+
+Epoch [16/40] start ...
+train loss = 1.345, validation word accuracy = 32.6%
+
+Epoch [17/40] start ...
+train loss = 1.287, validation word accuracy = 36.4%
+
+Epoch [18/40] start ...
+train loss = 1.248, validation word accuracy = 35.4%
+
+Epoch [19/40] start ...
+train loss = 1.212, validation word accuracy = 37.2%
+
+Epoch [20/40] start ...
+train loss = 1.176, validation word accuracy = 40.8%
+[Info] model saved in models\model_epoch20.pth
+
+Epoch [21/40] start ...
+train loss = 1.136, validation word accuracy = 40.2%
+
+Epoch [22/40] start ...
+train loss = 1.120, validation word accuracy = 42.0%
+
+Epoch [23/40] start ...
+train loss = 1.091, validation word accuracy = 38.8%
+
+Epoch [24/40] start ...
+train loss = 1.068, validation word accuracy = 44.2%
+
+Epoch [25/40] start ...
+train loss = 1.045, validation word accuracy = 42.8%
+
+Epoch [26/40] start ...
+train loss = 1.030, validation word accuracy = 41.8%
+
+Epoch [27/40] start ...
+train loss = 1.006, validation word accuracy = 43.6%
+
+Epoch [28/40] start ...
+train loss = 0.989, validation word accuracy = 42.4%
+
+Epoch [29/40] start ...
+train loss = 0.979, validation word accuracy = 44.0%
+
+Epoch [30/40] start ...
+train loss = 0.964, validation word accuracy = 44.2%
+[Info] model saved in models\model_epoch30.pth
+
+Epoch [31/40] start ...
+train loss = 0.947, validation word accuracy = 46.0%
+
+Epoch [32/40] start ...
+train loss = 0.933, validation word accuracy = 45.0%
+
+Epoch [33/40] start ...
+train loss = 0.926, validation word accuracy = 46.4%
+
+Epoch [34/40] start ...
+train loss = 0.906, validation word accuracy = 48.2%
+
+Epoch [35/40] start ...
+train loss = 0.901, validation word accuracy = 48.4%
+
+Epoch [36/40] start ...
+train loss = 0.886, validation word accuracy = 48.6%
+
+Epoch [37/40] start ...
+train loss = 0.879, validation word accuracy = 49.4%
+
+Epoch [38/40] start ...
+train loss = 0.874, validation word accuracy = 49.2%
+
+Epoch [39/40] start ...
+train loss = 0.861, validation word accuracy = 48.0%
+
+Epoch [40/40] start ...
+train loss = 0.856, validation word accuracy = 50.0%
+[Info] model saved in models\model_epoch40.pth
+loss and accuracy curves has been saved in loss_and_accuracy.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/a.png
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: parking
+
+CTC visualization has been saved as data/my_own/a_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/marvelstudios
+forrtl: error (200): program aborting due to control-C event
+Image              PC                Routine            Line        Source
+libifcoremd.dll    00007FFA95AE3B58  Unknown               Unknown  Unknown
+KERNELBASE.dll     00007FFAE2B2B943  Unknown               Unknown  Unknown
+KERNEL32.DLL       00007FFAE4987034  Unknown               Unknown  Unknown
+ntdll.dll          00007FFAE5002651  Unknown               Unknown  Unknown
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/marvelstudios.jpg
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: mrastumis
+
+CTC visualization has been saved as data/my_own/marvelstudios_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/marvel.jpg        
+[Info] Load model from models/model_epoch40.pth
+[ WARN:0@1.168] global D:\a\opencv-python\opencv-python\opencv\modules\imgcodecs\src\loadsave.cpp (239) cv::findDecoder imread_('data/my_own/marvel.jpg'): can't open/read file: check file path/integrity
+Traceback (most recent call last):
+  File "main.py", line 293, in <module>
+    predict(
+  File "main.py", line 227, in predict
+    raise AssertionError(f'the image {im_path} may not exist, please check it.')
+AssertionError: the image data/my_own/marvel.jpg may not exist, please check it.
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/marvel.png
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: marvel
+
+CTC visualization has been saved as data/my_own/marvel_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/casino_royal.png
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: csmoeowe
+
+CTC visualization has been saved as data/my_own/casino_royal_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/skyfall.png      
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: skyfall
+
+CTC visualization has been saved as data/my_own/skyfall_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/spectre.png
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: spectre
+
+CTC visualization has been saved as data/my_own/spectre_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/Quantum_of_Solace.png
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: alanunosoata
+
+CTC visualization has been saved as data/my_own/Quantum_of_Solace_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/007.jpg
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: doza
+
+CTC visualization has been saved as data/my_own/007_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/007.jpg
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: dor
+
+CTC visualization has been saved as data/my_own/007_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/numbers.jpg 
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: srzozna
+
+CTC visualization has been saved as data/my_own/numbers_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/numbers.jpg
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: piazoz
+
+CTC visualization has been saved as data/my_own/numbers_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>python main.py --mode predict --im_path data/my_own/marvelstudios.jpg
+[Info] Load model from models/model_epoch40.pth
+D:\Anaconda\lib\site-packages\torch\nn\functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  ..\c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+prediction: mamastuls
+
+CTC visualization has been saved as data/my_own/marvelstudios_vis.jpg
+
+(base) E:\2022_1\MR\Media_Cognition_hw\hw5>
